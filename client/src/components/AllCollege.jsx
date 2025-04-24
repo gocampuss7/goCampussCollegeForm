@@ -5,6 +5,7 @@ import axios from "axios";
 const AllCollege = () => {
   const [colleges, setColleges] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true); // <- Added loading state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +17,8 @@ const AllCollege = () => {
         setColleges(res.data);
       } catch (error) {
         console.error("Error fetching colleges:", error);
+      } finally {
+        setLoading(false); // <- Stop loading after data is fetched
       }
     };
 
@@ -41,31 +44,39 @@ const AllCollege = () => {
         />
       </div>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredColleges.map((college) => (
-          <div
-            key={college._id}
-            onClick={() => navigate(`/college/${college._id}`)}
-            className="bg-white cursor-pointer rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform"
-          >
-            <img
-              src={college.profilePic}
-              alt={college.collegeName}
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-lg font-semibold">{college.collegeName}</h2>
-              <p className="text-sm text-gray-600">{college.location}</p>
-              <p className="text-sm text-gray-500 mt-1">
-                {college.counsellingNames || "N/A"}
-              </p>
-            </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : (
+        <>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredColleges.map((college) => (
+              <div
+                key={college._id}
+                onClick={() => navigate(`/college/${college._id}`)}
+                className="bg-white cursor-pointer rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform"
+              >
+                <img
+                  src={college.profilePic}
+                  alt={college.collegeName}
+                  className="w-full h-40 object-cover"
+                />
+                <div className="p-4">
+                  <h2 className="text-lg font-semibold">{college.collegeName}</h2>
+                  <p className="text-sm text-gray-600">{college.location}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {college.counsellingNames || "N/A"}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {filteredColleges.length === 0 && (
-        <p className="text-center text-gray-600 mt-10">No colleges found.</p>
+          {filteredColleges.length === 0 && (
+            <p className="text-center text-gray-600 mt-10">No colleges found.</p>
+          )}
+        </>
       )}
     </div>
   );
