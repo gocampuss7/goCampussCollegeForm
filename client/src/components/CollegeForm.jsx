@@ -56,6 +56,13 @@ const CollegeForm = () => {
     setFormData((prev) => ({ ...prev, seatMatrix: updated }));
   };
 
+  const wakeUpCallToBackend = async () => {
+    const response = await axios.get(`${import.meta.env.VITE_backendUrl}`);
+    console.log(response.data);
+  };
+
+  wakeUpCallToBackend();
+
   const addSeatMatrixRow = () => {
     setFormData((prev) => ({
       ...prev,

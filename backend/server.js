@@ -78,6 +78,10 @@ app.get("/api/college-info/:id", async (req, res) => {
   }
 });
 
+app.get("/", (req,res)=>{
+  res.send("Backend Activated");
+})
+
 
 // Start server
 app.listen(port, () => {
