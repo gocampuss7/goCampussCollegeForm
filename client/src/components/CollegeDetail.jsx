@@ -50,12 +50,12 @@ const CollegeDetail = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-amber-100 shadow-lg rounded-xl mb-10">
-      <div className="absolute top-4 right-10 flex gap-2">
+      <div className="absolute top-6 right-12 flex gap-2">
         <button onClick={handleEdit} title="Edit College">
-          <FiEdit className="text-blue-600 hover:text-blue-800 text-2xl" />
+          <FiEdit className="text-blue-600 hover:text-blue-800 text-xl" />
         </button>
         <button onClick={handleDelete} title="Delete College">
-          <FiTrash2 className="text-red-600 hover:text-red-800 text-2xl" />
+          <FiTrash2 className="text-red-600 hover:text-red-800 text-xl" />
         </button>
       </div>
 
