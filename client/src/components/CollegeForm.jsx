@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate, useParams } from "react-router-dom";
 
 const CollegeForm = () => {
   const [loading, setLoading] = useState({
@@ -49,6 +50,8 @@ const CollegeForm = () => {
 
   const [formData, setFormData] = useState(initialState);
   const [backendAwake, setBackendAwake] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const handleSeatMatrixChange = (idx, field, value) => {
     const updated = [...formData.seatMatrix];
@@ -56,21 +59,23 @@ const CollegeForm = () => {
     setFormData((prev) => ({ ...prev, seatMatrix: updated }));
   };
 
-  const wakeUpCallToBackend = async () => {
+  const wakeUpCallToBackend = async (retries = 5, delay = 2000) => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_backendUrl}`);
-      console.log("Backend awake:", response.data);
-      // toast.success("Connected to backend.");
+      await axios.get(`${import.meta.env.VITE_backendUrl}`);
       setBackendAwake(true);
+      toast.success("Backend connected!");
     } catch (err) {
-      console.error("Backend wake-up failed:", err);
-      toast.error("Failed to connect to backend.");
+      if (retries === 0) {
+        toast.error("Failed to connect to backend.");
+        return;
+      }
+      setTimeout(() => {
+        wakeUpCallToBackend(retries - 1, delay * 2);
+      }, delay);
     }
   };
 
-  setInterval(()=>{
-    wakeUpCallToBackend();
-  }, 5000);
+  if(!id){wakeUpCallToBackend();}
 
   const addSeatMatrixRow = () => {
     setFormData((prev) => ({
@@ -175,14 +180,25 @@ const CollegeForm = () => {
       toast.error("Please fill all required fields.");
       return;
     }
+
     setLoading((prev) => ({ ...prev, submit: true }));
+
     try {
-      await axios.post(
-        `${import.meta.env.VITE_backendUrl}/api/college-info`,
-        formData
-      );
-      toast.success("College info submitted!");
+      if (id) {
+        await axios.put(
+          `${import.meta.env.VITE_backendUrl}/api/college-info/${id}`,
+          formData
+        );
+        toast.success("College info updated!");
+      } else {
+        await axios.post(
+          `${import.meta.env.VITE_backendUrl}/api/college-info`,
+          formData
+        );
+        toast.success("College info submitted!");
+      }
       setFormData(initialState);
+      navigate(`/college/${id}`);
     } catch (err) {
       console.error("Submit error:", err);
       toast.error("Failed to submit college info");
@@ -190,6 +206,28 @@ const CollegeForm = () => {
       setLoading((prev) => ({ ...prev, submit: false }));
     }
   };
+
+  useEffect(() => {
+    if (id) {
+      const fetchCollege = async () => {
+        try {
+          const res = await axios.get(`${import.meta.env.VITE_backendUrl}/api/college-info/${id}`);
+          const data = res.data;
+          setFormData({
+            ...initialState,
+            ...data,
+          });
+          setBackendAwake(true);
+        } catch (err) {
+          console.error("Failed to fetch college data:", err);
+          toast.error("Could not load college data.");
+        }
+      };
+      fetchCollege();
+    }
+  }, [id]);
+  
+  
 
   return (
     <>
@@ -207,7 +245,9 @@ const CollegeForm = () => {
           onSubmit={handleSubmit}
           className="p-6 max-w-5xl mx-auto space-y-6 bg-white shadow-md rounded-md"
         >
-          <h2 className="text-3xl font-bold text-center">College Info Form</h2>
+          <h2 className="text-3xl font-bold text-center">
+            {id ? "Edit College Info" : "Add College Info"}
+          </h2>
 
           <input
             type="text"

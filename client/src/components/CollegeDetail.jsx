@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 const CollegeDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [college, setCollege] = useState(null);
 
   useEffect(() => {
@@ -21,12 +23,42 @@ const CollegeDetail = () => {
     fetchCollege();
   }, [id]);
 
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this college?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_backendUrl}/api/college-info/${id}`
+      );
+      navigate("/all-colleges");
+    } catch (error) {
+      console.error("Error deleting college:", error);
+      alert("Failed to delete college.");
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/edit/${id}`);
+  };
+
   if (!college) {
     return <div className="text-center mt-10">Loading...</div>;
   }
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-amber-100 shadow-lg rounded-xl mb-10">
+      <div className="absolute top-4 right-4 flex gap-4">
+        <button onClick={handleEdit} title="Edit College">
+          <FiEdit className="text-blue-600 hover:text-blue-800 text-2xl" />
+        </button>
+        <button onClick={handleDelete} title="Delete College">
+          <FiTrash2 className="text-red-600 hover:text-red-800 text-2xl" />
+        </button>
+      </div>
+
       {/* College Name & Profile Picture */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-800">

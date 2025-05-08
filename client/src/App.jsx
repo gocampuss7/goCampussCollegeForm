@@ -13,6 +13,7 @@ const App = () => {
         <Route path="/" element={<CollegeForm/>} />
         <Route path="/all-colleges" element={<AllCollege/>} />
         <Route path="/college/:id" element={<CollegeDetail/>} />
+        <Route path="/edit/:id" element={<CollegeForm />} />
       </Routes>
     </BrowserRouter>
   )

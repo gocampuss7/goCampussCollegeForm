@@ -78,6 +78,29 @@ app.get("/api/college-info/:id", async (req, res) => {
   }
 });
 
+app.delete("/api/college-info/:id", async (req, res) => {
+  try {
+    await CollegeModel.findByIdAndDelete(req.params.id);
+    res.json({ message: "College deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting college" });
+  }
+});
+
+// PUT update college
+app.put("/api/college-info/:id", async (req, res) => {
+  try {
+    const updatedCollege = await CollegeModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedCollege);
+  } catch (err) {
+    res.status(500).json({ message: "Error updating college" });
+  }
+});
+
 app.get("/", (req,res)=>{
   res.send("Backend Activated");
 })
