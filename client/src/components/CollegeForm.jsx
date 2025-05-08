@@ -59,11 +59,11 @@ const CollegeForm = () => {
     setFormData((prev) => ({ ...prev, seatMatrix: updated }));
   };
 
-  const wakeUpCallToBackend = async (retries = 5, delay = 2000) => {
+  const wakeUpCallToBackend = async (retries = 3, delay = 2000) => {
     try {
       await axios.get(`${import.meta.env.VITE_backendUrl}`);
       setBackendAwake(true);
-      toast.success("Backend connected!");
+      // toast.success("Backend connected!");
     } catch (err) {
       if (retries === 0) {
         toast.error("Failed to connect to backend.");
@@ -190,6 +190,7 @@ const CollegeForm = () => {
           formData
         );
         toast.success("College info updated!");
+        navigate(`/college/${id}`);
       } else {
         await axios.post(
           `${import.meta.env.VITE_backendUrl}/api/college-info`,
@@ -198,7 +199,7 @@ const CollegeForm = () => {
         toast.success("College info submitted!");
       }
       setFormData(initialState);
-      navigate(`/college/${id}`);
+      
     } catch (err) {
       console.error("Submit error:", err);
       toast.error("Failed to submit college info");
