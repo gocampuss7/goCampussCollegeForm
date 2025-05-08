@@ -50,7 +50,7 @@ const CollegeDetail = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-amber-100 shadow-lg rounded-xl mb-10">
-      <div className="absolute top-4 right-4 flex gap-4">
+      <div className="absolute top-4 right-10 flex gap-2">
         <button onClick={handleEdit} title="Edit College">
           <FiEdit className="text-blue-600 hover:text-blue-800 text-2xl" />
         </button>
