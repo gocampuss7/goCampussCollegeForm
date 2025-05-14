@@ -172,14 +172,14 @@ const CollegeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !formData.collegeName ||
-      !formData.profilePic ||
-      formData.seatMatrix.length === 0
-    ) {
-      toast.error("Please fill all required fields.");
-      return;
-    }
+    // if (
+    //   !formData.collegeName ||
+    //   !formData.profilePic ||
+    //   formData.seatMatrix.length === 0
+    // ) {
+    //   toast.error("Please fill all required fields.");
+    //   return;
+    // }
 
     setLoading((prev) => ({ ...prev, submit: true }));
 
@@ -253,15 +253,15 @@ const CollegeForm = () => {
           <input
             type="text"
             name="collegeName"
-            placeholder="College Name *"
-            required
+            placeholder="College Name"
             value={formData.collegeName}
             onChange={handleChange}
             className="w-full p-2 border rounded"
+            required
           />
 
           <div className="space-y-2">
-            <h3 className="font-semibold text-lg mt-4">Seat Matrix *</h3>
+            <h3 className="font-semibold text-lg mt-4">Seat Matrix</h3>
             {formData.seatMatrix.map((item, idx) => (
               <div key={idx} className="flex gap-2">
                 <input
@@ -272,7 +272,6 @@ const CollegeForm = () => {
                     handleSeatMatrixChange(idx, "branch", e.target.value)
                   }
                   className="p-2 border rounded w-1/2"
-                  required
                 />
                 <input
                   type="number"
@@ -282,7 +281,6 @@ const CollegeForm = () => {
                     handleSeatMatrixChange(idx, "seats", e.target.value)
                   }
                   className="p-2 border rounded w-1/2"
-                  required
                 />
               </div>
             ))}
@@ -373,7 +371,7 @@ const CollegeForm = () => {
 
             {/* Profile Picture */}
             <div className="mt-2">
-              <label className="block font-medium">Profile Picture *</label>
+              <label className="block font-medium">Profile Picture</label>
               <input
                 type="file"
                 onChange={(e) =>

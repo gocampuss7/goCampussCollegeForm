@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const seatMatrixSchema = new mongoose.Schema({
-  branch: { type: String, required: true },
-  seats: { type: String, required: true },
+  branch: { type: String, },
+  seats: { type: String, },
 });
 
 const companyDataSchema = new mongoose.Schema({
@@ -18,10 +18,10 @@ const collegeInfoSchema = new mongoose.Schema({
   campus: { type: String, },
   location: { type: String, },
   nirfRanking: { type: String, },
-  seatMatrix: { type: [seatMatrixSchema], required: true },
+  seatMatrix: { type: [seatMatrixSchema], },
   totalCSStudents: { type: String, },
   nbaBranches: { type: String, },
-  profilePic: { type: String, required: true },
+  profilePic: { type: String, },
   collegeTourImages: { type: [String], },
   boysHostelImages: { type: [String], },
   girlsHostelImages: { type: [String], },
