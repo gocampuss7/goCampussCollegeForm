@@ -132,7 +132,7 @@ app.post("/api/gemini-autofill", async (req, res) => {
   "collegeName": "",
   "counsellingNames": "",
   "established": "",
-  "campusSize": "",
+  "campus": "size of campus",
   "location": "",
   "nirfRanking": "",
   "seatMatrix": [
