@@ -11,6 +11,7 @@ const CollegeForm = () => {
     boysHostelImages: false,
     girlsHostelImages: false,
     submit: false,
+    autoFill: false,
   });
 
   const initialState = {
@@ -75,7 +76,9 @@ const CollegeForm = () => {
     }
   };
 
-  if(!id){wakeUpCallToBackend();}
+  if (!id) {
+    wakeUpCallToBackend();
+  }
 
   const addSeatMatrixRow = () => {
     setFormData((prev) => ({
@@ -169,6 +172,31 @@ const CollegeForm = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+  
+  const handleAutoFill = async (collegeName) => {
+  setLoading((prev) => ({ ...prev, autoFill: true }));
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_backendUrl}/api/gemini-autofill`,
+      { collegeName }         
+    )
+    
+    if (!response){
+      toast.error("Failed to fetch from backend");
+      throw new Error("Failed to fetch from backend");
+    }
+    // console.log(response.data);
+    const data = await response.data;
+    // console.log(data);
+    setFormData((prev) => ({ ...prev, ...data }));
+  } catch (err) {
+    toast.error("Failed to fetch from backend");
+    console.error("Error in autofill:", err);
+  } finally {
+    setLoading((prev) => ({ ...prev, autoFill: false }));
+  }
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -199,7 +227,6 @@ const CollegeForm = () => {
         toast.success("College info submitted!");
       }
       setFormData(initialState);
-      
     } catch (err) {
       console.error("Submit error:", err);
       toast.error("Failed to submit college info");
@@ -212,7 +239,9 @@ const CollegeForm = () => {
     if (id) {
       const fetchCollege = async () => {
         try {
-          const res = await axios.get(`${import.meta.env.VITE_backendUrl}/api/college-info/${id}`);
+          const res = await axios.get(
+            `${import.meta.env.VITE_backendUrl}/api/college-info/${id}`
+          );
           const data = res.data;
           setFormData({
             ...initialState,
@@ -227,8 +256,6 @@ const CollegeForm = () => {
       fetchCollege();
     }
   }, [id]);
-  
-  
 
   return (
     <>
@@ -256,9 +283,18 @@ const CollegeForm = () => {
             placeholder="College Name"
             value={formData.collegeName}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-[80%] p-2 border rounded"
             required
           />
+
+          <button
+            type="button"
+            className="btn-primary m-1"
+            onClick={() => handleAutoFill(formData.collegeName)}
+            title="Auto Fill with AI"
+          >
+            {loading.autoFill ? "Auto Filling..." : "Auto Fill"}
+          </button>
 
           <div className="space-y-2">
             <h3 className="font-semibold text-lg mt-4">Seat Matrix</h3>

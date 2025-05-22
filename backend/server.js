@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const CollegeModel = require("./models/CollegeModel");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const axios = require("axios");
 
 dotenv.config();
 
@@ -11,11 +12,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-    origin : ["http://localhost:5173", "https://gocampuss-form.onrender.com"],
-    methods : ["GET, POST, PUT, DELETE"],
-    credentials : true
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://gocampuss-form.onrender.com"],
+    methods: ["GET, POST, PUT, DELETE"],
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 
 // Connect to MongoDB
@@ -101,10 +104,157 @@ app.put("/api/college-info/:id", async (req, res) => {
   }
 });
 
-app.get("/", (req,res)=>{
+app.get("/", (req, res) => {
   res.send("Backend Activated");
-})
+});
 
+app.post("/api/gemini-autofill", async (req, res) => {
+  try {
+    const { collegeName } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "Server configuration error: Gemini API key not found.",
+      });
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const requestPayload = {
+      contents: [
+        {
+          parts: [
+            {
+              text: `I need detailed and authentic data about the college named ${collegeName}. Please follow the instructions strictly and return a single JSON object with the following structure:
+
+{
+  "collegeName": "",
+  "counsellingNames": "",
+  "established": "",
+  "campus": "",
+  "location": "",
+  "nirfRanking": "",
+  "seatMatrix": [
+    { "branch": "", "seats": "" }
+  ],
+  "totalCSStudents": "",
+  "nbaBranches": "",
+  "cutoffs": {},
+  "hostelFees": {
+    "boys": "",
+    "girls": ""
+  },
+  "academicFees": {
+    "year1": "",
+    "year2": "",
+    "year3": "",
+    "year4": "",
+    "total": ""
+  },
+  "totalFees": "",
+  "placements": {
+    "totalStudents": "",
+    "totalCompanies": "",
+    "totalOffers": "",
+    "highestPackage": "",
+    "avgPackage": "",
+    "csAvgPackage": "",
+    "companyData": [
+      { "name": "", "offers": "", "ctc": "" }
+    ]
+  }
+}
+
+Please follow these detailed instructions:
+
+1. The seatMatrix must include all undergraduate B.Tech branches and their respective student intake as published on the college’s official website.
+
+2. In hostelFees, include details like room rent, mess fees, and any other charges. Provide total 4-year hostel fee separately for boys and girls.
+
+3. In academicFees, break down yearly academic fees and give the total for 4 years.
+
+4. totalFees = academicFees.total + hostelFees.boys (or girls, choose available/more common one).
+
+5. totalCSStudents is the actual intake of CSE in one batch.
+
+6. In placements, include:
+   - total students placed
+   - total companies visited
+   - total offers
+   - highest package
+   - avg package
+   - csAvgPackage
+   - At least 10 companies with offers and CTC
+
+if You are not able to get any specific data don't refer me to other source just include the most appropriate you get.
+Return only the JSON object. DO NOT include any explanation, comment, markdown formatting, or disclaimer. Just return raw JSON as plain text.`,
+            },
+          ],
+        },
+      ],
+    };
+
+    const response = await axios.post(url, requestPayload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const geminiText =
+      response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    // console.log(geminiText);
+    if (geminiText) {
+      try {
+        const cleaned = extractJsonFromText(geminiText);
+        console.log(cleaned);
+        if (cleaned) {
+          const parsed = JSON.parse(cleaned);
+          return res.json(parsed);
+        }
+      } catch (err) {
+        return res.status(500).json({
+          error: "Failed to parse JSON from Gemini API response.",
+          rawGeminiOutput: geminiText,
+        });
+      }
+    }
+
+    return res.status(500).json({ error: "Invalid response from Gemini API." });
+  } catch (error) {
+    if (error.response) {
+      return res.status(error.response.status).json({
+        error: error.response.data || "Gemini API error",
+        status: error.response.status,
+      });
+    } else if (error.request) {
+      return res.status(504).json({
+        error: "No response from Gemini API (timeout or network issue).",
+      });
+    } else {
+      return res
+        .status(500)
+        .json({ error: error.message || "Internal server error" });
+    }
+  }
+});
+
+const extractJsonFromText = (text) => {
+  try {
+    // Extract content between ```json and ```
+    const jsonMatch = text.match(/```json([\s\S]*?)```/);
+    if (jsonMatch) return jsonMatch[1].trim();
+
+    // Fallback: Try to find first valid JSON-looking block
+    const braceMatch = text.match(/{[\s\S]*}/);
+    if (braceMatch) return braceMatch[0].trim();
+
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
 
 // Start server
 app.listen(port, () => {
