@@ -14,7 +14,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://gocampuss-form.onrender.com","https://gocampuss.vercel.app/","https://gocampuss.com"],
+    origin: ["http://localhost:5173", "https://gocampuss-form.onrender.com","https://gocampuss.vercel.app","https://www.gocampuss.com"],
     methods: ["GET, POST, PUT, DELETE"],
     credentials: true,
   })
