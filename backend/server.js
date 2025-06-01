@@ -105,7 +105,7 @@ app.put("/api/college-info/:id", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Backend Activated");
+  res.send("server is up");
 });
 
 app.post("/api/gemini-autofill", async (req, res) => {
