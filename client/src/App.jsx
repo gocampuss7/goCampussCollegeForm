@@ -4,7 +4,7 @@ import CollegeForm from "./components/CollegeForm";
 import AllCollege from "./components/AllCollege";
 import CollegeDetail from "./components/CollegeDetail";
 import Navbar from "./common/Navbar";
-import PrivateRoute from "./common/privateRoute";
+import PrivateRoute from "./common/PrivateRouting";
 
 const App = () => {
   return (
