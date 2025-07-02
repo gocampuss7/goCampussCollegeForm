@@ -15,6 +15,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
+      // "http://localhost:5173",
       "https://gocampuss-form.onrender.com",
       "https://gocampuss.vercel.app",
       "https://www.gocampuss.com",
