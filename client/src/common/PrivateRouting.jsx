@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Login from "../components/Login";
 
-const EXPIRY_DURATION_MS = 60 * 1000;
+const EXPIRY_DURATION_MS = 60 * 60 * 1000;
 
 const PrivateRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -26,6 +26,7 @@ const PrivateRoute = ({ children }) => {
   const handleLogin = () => {
     localStorage.setItem("authenticated", "true");
     localStorage.setItem("authTimestamp", Date.now().toString());
+    window.dispatchEvent(new Event("authChanged")); 
     setIsAuthenticated(true);
   };
 
