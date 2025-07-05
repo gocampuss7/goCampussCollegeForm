@@ -1,18 +1,25 @@
 import { useState } from "react";
+import axios from "axios";
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const secret = import.meta.env.VITE_APP_SECRET_PASSWORD;
 
-    if (password === secret) {
-      localStorage.setItem("authenticated", "true");
-      onLogin();
-    } else {
-      setError("Invalid password");
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_backendUrl}/login`,
+        { password },
+        { withCredentials: true }
+      );
+
+      if (res.status === 200) {
+        window.location.reload(); // reload to re-trigger auth check
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed");
     }
   };
 

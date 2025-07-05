@@ -5,6 +5,8 @@ const CollegeModel = require("./models/CollegeModel");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const axios = require("axios");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 dotenv.config();
 
@@ -15,7 +17,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      // "http://localhost:5173",
+      "http://localhost:5173",
       "https://gocampuss-form.onrender.com",
       "https://gocampuss.vercel.app",
       "https://www.gocampuss.com",
@@ -25,6 +27,8 @@ app.use(
   })
 );
 app.use(bodyParser.json());
+app.use(cookieParser());
+
 
 // Connect to MongoDB
 mongoose
@@ -112,6 +116,63 @@ app.put("/api/college-info/:id", async (req, res) => {
 app.get("/", (req, res) => {
   res.send("server is up");
 });
+
+app.post("/login", async (req, res) => {
+  try {
+    const password = req.body.password;
+    // console.log(password);
+
+    if (!password) {
+      return res.status(400).json({ message: "Password Required" });
+    }
+
+    if (password === process.env.SECRET_PASSWORD) {
+      const token = jwt.sign({ user: "admin" }, process.env.SECRET_JWT);
+      // console.log(token);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      });
+
+      return res.status(200).json({ message: "Login Success" });
+    } else {
+      return res.status(401).json({ message: "Incorrect Password" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Login Failed", error: error.message });
+  }
+});
+
+app.get("/login", (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ message: "No Login Credential found" });
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRET_JWT);
+    if (!decoded) {
+      return res.status(401).json({ message: "Invalid Token" });
+    }
+
+    return res.status(200).json({ message: "Login Success" });
+  } catch (error) {
+    return res.status(401).json({ message: "Login Failed", error: error.message });
+  }
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+
+  return res.status(200).json({ message: "Logged out" });
+});
+
 
 app.post("/api/gemini-autofill", async (req, res) => {
   try {
